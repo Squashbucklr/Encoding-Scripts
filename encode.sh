@@ -5,13 +5,12 @@
 
 start=`date +%s`
 
-read subs < ~/Documents/scripts/data/encode_subs.txt
-read surround < ~/Documents/scripts/data/encode_surround.txt
-read crf < ~/Documents/scripts/data/encode_crf.txt
-read sopts < ~/Documents/scripts/data/encode_sopts.txt
-read aopts < ~/Documents/scripts/data/encode_aopts.txt
-read other < ~/Documents/scripts/data/encode_other.txt
-read preset < ~/Documents/scripts/data/encode_preset.txt
+if [[ ! -f "./.encode_options" ]]; then
+    echo "Error: encode settings not present"
+    exit 1
+fi
+
+{ read subs; read surround; read audio; read crf; read sopts; read aopts; read other; read preset;} < ./.encode_options
 
 echo "======================================"
 echo "Encoding $2 [`date`]"
@@ -35,9 +34,9 @@ elif [[ $subs = "picture" ]]; then
 elif [[ $subs = "no" ]]; then
 	vpart=(-map 0:v)
 elif [[ $subs = "folder" ]]; then
-    vpart=(-map 0:v:0 -vf "subtitles=subs/$2.mkv:si=0")
-else
-	vpart=(-map 0:v:0 -vf "subtitles=sym-$2.mkv:si=${subs}")
+    vpart=(-map 0:v:0 -vf "subtitles=subs/$2.mkv:si=${sopts}")
+else # = si
+	vpart=(-map 0:v:0 -vf "subtitles=sym-$2.mkv:si=${sopts}")
 fi
 
 if [[ $surround = "5.1" ]]; then
@@ -48,6 +47,12 @@ elif [[ $surround = "6.1" ]]; then
 	afilter=(-vol 425 -af "pan=stereo|FL=0.5*FC+0.5*BC+0.707*FL+0.707*BL+0.5*LFE|FR=0.5*FC+0.5*BC+0.707*FR+0.707*BR+0.5*LFE" -strict 2)
 else
 	afilter=()
+fi
+
+if [[ $audio = "current" ]]; then
+    apart=(-map `echo "$aopts"`)
+else # = folder
+    apart=(-i audio/$2.mkv -map `echo "$aopts"`)
 fi
 
 if [[ $other = "VP9" ]]; then
@@ -76,12 +81,12 @@ ln "$1" sym-$2.mkv
 # MASTER ENCODING COMMAND
 fcom=(nice -n15 ffmpeg -n -v warning -stats -i "$1")
 vcom=("${vpart[@]}" "${vcodecs[@]}" -crf `echo "$crf"` -aq-mode 3 -vsync 2)
-acom=(-map `echo "$aopts"` "${afilter[@]}" "${acodecs[@]}")
+acom=("${apart[@]}" "${afilter[@]}" "${acodecs[@]}")
 
 
 t=()
 # comment this
-# t=(-ss 00:00:00 -to 00:00:30)
+# t=(-ss 00:00:00 -to 00:02:00)
 
 
 echo "Encoding video..."

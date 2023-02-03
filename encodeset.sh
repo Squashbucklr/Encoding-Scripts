@@ -1,9 +1,11 @@
 #!/bin/bash
 
-subs_def="0"
+subs_def="si"
 surround_def="no"
+audio_def="current"
 crf_def="20"
-sopts_def="0:s:m:language:eng" # when subs=yes
+sopts_si_def="0" # when subs=si
+sopts_yes_def="0:s:m:language:eng" # when subs=yes
 aopts_def="0:a:m:language:jpn"
 other_def="H.264"
 preset_def="medium"
@@ -12,26 +14,30 @@ preset_def="medium"
 if [[ $1 = "default" ]]; then
 	subs=$subs_def
 	surround=$surround_def
+	audio=$audio_def
 	crf=$crf_def
-	sopts=$sopts_def
+	sopts=$sopts_si_def
 	aopts=$aopts_def
 	other=$other_def
 	preset=$preset_def
 elif [[ $1 == "read" ]]; then
-	cat ~/Documents/scripts/data/encode_subs.txt
-	cat ~/Documents/scripts/data/encode_surround.txt
-	cat ~/Documents/scripts/data/encode_crf.txt
-	cat ~/Documents/scripts/data/encode_sopts.txt
-	cat ~/Documents/scripts/data/encode_aopts.txt
-	cat ~/Documents/scripts/data/encode_other.txt
-	cat ~/Documents/scripts/data/encode_preset.txt
+    if [[ -f "./.encode_options" ]]; then
+	    cat .encode_options
+    else
+        echo No encode settings found!
+    fi
 	exit 0
 else
-	echo "Set subtitle mode [si, yes, picture, no, folder, file] (0 (si))"
+	echo "Set subtitle mode [si, yes, picture, no, folder, file] (si)"
 	read subs
 	subs_file=subs_file_def
 	if [[ $subs = "" ]]; then
 		subs=$subs_def
+	fi
+	echo "Set audio mode [current, folder] (current)"
+	read audio
+	if [[ $audio = "" ]]; then
+		audio=$audio_def
 	fi
 	echo "Set surround mode [5.1, 6.1, no] (no)"
 	read surround
@@ -47,17 +53,23 @@ else
 		echo "Set subtitle map options (0:s:m:language:eng)"
 		read sopts
 		if [[ $sopts = "" ]]; then
-			sopts=$sopts_def
+			sopts=$sopts_yes_def
+		fi
+	elif [[ $subs = "si" ]] || [[ $subs = "folder" ]]; then
+		echo "Set subtitle si options (0)"
+		read sopts
+		if [[ $sopts = "" ]]; then
+			sopts=$sopts_si_def
 		fi
 	else
-            sopts=""
+            sopts="sopts unused"
 	fi
 	echo "Set audio map options (0:a:m:language:jpn)"
 	read aopts
 	if [[ $aopts = "" ]]; then
 		aopts=$aopts_def
 	fi
-	echo "Set audio map options [H.264, VP9, 2pass-VP9] (H.264)"
+	echo "Set other options (video encoder) [H.264, VP9, 2pass-VP9] (H.264)"
 	read other
 	if [[ $other = "" ]]; then
 		other=$other_def
@@ -73,17 +85,15 @@ else
 	fi
 fi
 
-echo $subs > ~/Documents/scripts/data/encode_subs.txt
-echo $surround > ~/Documents/scripts/data/encode_surround.txt
-echo $crf > ~/Documents/scripts/data/encode_crf.txt
-echo $sopts > ~/Documents/scripts/data/encode_sopts.txt
-echo $aopts > ~/Documents/scripts/data/encode_aopts.txt
-echo $other > ~/Documents/scripts/data/encode_other.txt
-echo $preset > ~/Documents/scripts/data/encode_preset.txt
-
-# cat ~/Documents/ScriptData/encode_subs.txt
-# cat ~/Documents/ScriptData/encode_crf.txt
-# cat ~/Documents/ScriptData/encode_sopts.txt
-# cat ~/Documents/ScriptData/encode_aopts.txt
+cat > ./.encode_options<< EOF
+$subs
+$surround
+$audio
+$crf
+$sopts
+$aopts
+$other
+$preset
+EOF
 
 echo "set!"
