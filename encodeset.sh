@@ -3,12 +3,12 @@
 subs_def="si"
 surround_def="no"
 audio_def="current"
-crf_def="20"
+crf_def="19"
 sopts_si_def="0" # when subs=si
 sopts_yes_def="0:s:m:language:eng" # when subs=yes
 aopts_def="0:a:m:language:jpn"
 other_def="H.264"
-preset_def="medium"
+preset_def="slow"
 
 
 if [[ $1 = "default" ]]; then
@@ -44,7 +44,7 @@ else
 	if [[ $surround = "" ]]; then
 		surround=$surround_def
 	fi
-	echo "Set crf value [0 - 51] (20)"
+	echo "Set crf value [0 - 51] (19)"
 	read crf
 	if [[ $crf = "" ]]; then
 		crf=$crf_def
@@ -75,7 +75,7 @@ else
 		other=$other_def
 	fi
 	if [[ $other = "H.264" ]]; then
-		echo "Set H.264 profile (medium)"
+		echo "Set H.264 profile (slow)"
 		read preset
 		if [[ $preset = "" ]]; then
 			preset=$preset_def
