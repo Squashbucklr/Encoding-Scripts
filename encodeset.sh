@@ -39,7 +39,7 @@ else
 	if [[ $audio = "" ]]; then
 		audio=$audio_def
 	fi
-	echo "Set surround mode [5.1, 6.1, no] (no)"
+	echo "Set surround mode [2.1, 5.1, 6.1, no] (no)"
 	read surround
 	if [[ $surround = "" ]]; then
 		surround=$surround_def
