@@ -89,7 +89,7 @@ acom=("${apart[@]}" "${afilter[@]}" "${acodecs[@]}")
 
 t=()
 # comment this
-t=(-ss 00:00:00 -to 00:02:00)
+# t=(-ss 00:00:00 -to 00:02:00)
 
 
 echo "Encoding video..."
