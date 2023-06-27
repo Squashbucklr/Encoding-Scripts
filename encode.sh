@@ -41,13 +41,13 @@ fi
 
 if [[ $surround = "5.1" ]]; then
     echo "Using 5.1 Downmixer"
-	afilter=(-vol 425 -af "pan=stereo|FL=0.5*FC+0.707*FL+0.707*BL+0.5*LFE|FR=0.5*FC+0.707*FR+0.707*BR+0.5*LFE" -strict 2)
+	afilter=(-af "volume=1.660156,pan=stereo|FL=0.5*FC+0.707*FL+0.707*BL+0.5*LFE|FR=0.5*FC+0.707*FR+0.707*BR+0.5*LFE" -strict 2)
 elif [[ $surround = "6.1" ]]; then
     echo "Using 6.1 Downmixer"
-	afilter=(-vol 425 -af "pan=stereo|FL=0.5*FC+0.5*BC+0.707*FL+0.707*BL+0.5*LFE|FR=0.5*FC+0.5*BC+0.707*FR+0.707*BR+0.5*LFE" -strict 2)
+	afilter=(-af "volume=1.660156,pan=stereo|FL=0.5*FC+0.5*BC+0.707*FL+0.707*BL+0.5*LFE|FR=0.5*FC+0.5*BC+0.707*FR+0.707*BR+0.5*LFE" -strict 2)
 elif [[ $surround = "2.1" ]]; then
     echo "Using 2.1 Downmixer"
-	afilter=(-vol 256 -af "pan=stereo|FL=1*FL+0.5*LFE|FR=1*FR+0.5*LFE" -strict 2)
+	afilter=(-af "pan=stereo|FL=1*FL+0.5*LFE|FR=1*FR+0.5*LFE" -strict 2)
 else
 	afilter=()
 fi
@@ -89,7 +89,7 @@ acom=("${apart[@]}" "${afilter[@]}" "${acodecs[@]}")
 
 t=()
 # comment this
-t=(-ss 00:00:00 -to 00:02:00)
+# t=(-ss 00:00:00 -to 00:01:31)
 
 
 echo "Encoding video..."
