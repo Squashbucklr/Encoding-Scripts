@@ -10,16 +10,27 @@ if [[ ! -f "./.encode_options" ]]; then
     exit 1
 fi
 
-{ read subs; read surround; read audio; read crf; read sopts; read aopts; read other; read preset;} < ./.encode_options
+{ read subs; read surround; read audio; read crf; read sopts; read aopts; read other; read preset; read rsync;} < ./.encode_options
 
 echo "======================================"
 echo "Encoding $2 [`date`]"
 echo ""
 echo "using subs: \"$subs\", crf: \"$crf\", sopts: \"$sopts\", audio options: \"$aopts\""
 
+if [[ $rsync = "no" ]]; then
+    ln "$1" sym-$2.mkv
+    inpv="sym-$2.mkv"
+    outv="$2"
+else
+    echo
+    rsync --progress "$1" "$rsync/sym-$2.mkv"
+    inpv="$rsync/sym-$2.mkv"
+    outv="$rsync/$2"
+fi
+
 if [[ $subs = "yes" ]]; then
 	echo "Generating subs..."
-	ffmpeg -v panic -nostats -i "$1" -map `echo "$sopts"` -c:s copy encode-subs-$2.ass
+	ffmpeg -v panic -nostats -i "$inpv" -map `echo "$sopts"` -c:s copy encode-subs-$2.ass
 
 	if [[ $? -ne 0 ]]; then
 		echo "##################################"
@@ -36,7 +47,7 @@ elif [[ $subs = "no" ]]; then
 elif [[ $subs = "folder" ]]; then
     vpart=(-map 0:v:0 -vf "subtitles=subs/$2.mkv:si=${sopts}")
 else # = si
-	vpart=(-map 0:v:0 -vf "subtitles=sym-$2.mkv:si=${sopts}")
+	vpart=(-map 0:v:0 -vf "subtitles=$inpv:si=${sopts}")
 fi
 
 if [[ $surround = "5.1" ]]; then
@@ -75,14 +86,12 @@ else
     twopass="false"
 fi
 
-ln "$1" sym-$2.mkv
-
 # test ios encode (worked once, not anymore?)
 # ffmpeg -stats -i "$1" "${vpart[@]}" -map `echo "$aopts"` -c:v libx264 -coder 1 -pix_fmt yuv420p -profile:v high -level 4.2 -preset:v veryslow -tune animation -bf 3 -b_strategy 2 -g 100 -refs 10 -c:a aac -crf `echo "$crf"` -aq-mode 3 -t 30 $2.mov
 # -qcomp 0.7
 
 # MASTER ENCODING COMMAND
-fcom=(nice -n15 ffmpeg -n -v warning -stats -i "$1")
+fcom=(nice -n15 ffmpeg -n -v warning -stats -i "$inpv")
 vcom=("${vpart[@]}" "${vcodecs[@]}" -crf `echo "$crf"` -aq-mode 3 -vsync 2)
 acom=("${apart[@]}" "${afilter[@]}" "${acodecs[@]}")
 
@@ -95,9 +104,9 @@ t=()
 echo "Encoding video..."
 if [[ $twopass = "true" ]]; then
     "${fcom[@]}" "${vcom[@]}" "${t[@]}" -pass 1 -an -f null /dev/null && \
-    "${fcom[@]}" "${vcom[@]}" "${acom[@]}" "${t[@]}" -pass 2 $2$output
+    "${fcom[@]}" "${vcom[@]}" "${acom[@]}" "${t[@]}" -pass 2 $outv$output
 else
-    "${fcom[@]}" "${vcom[@]}" "${acom[@]}" "${t[@]}" $2$output
+    "${fcom[@]}" "${vcom[@]}" "${acom[@]}" "${t[@]}" $outv$output
 fi
 
 if [[ $? -ne 0 ]]; then
@@ -107,7 +116,13 @@ if [[ $? -ne 0 ]]; then
 	exit 1
 fi
 
-rm sym-$2.mkv
+rm $inpv
+if [[ $rsync = "no" ]]; then
+    echo skip > /dev/null
+else
+    echo
+    rsync --progress --remove-source-files "$outv$output" "$2$output"
+fi
 
 if [[ $subs = "yes" ]]; then
 	rm encode-subs-$2.ass

@@ -9,6 +9,7 @@ sopts_yes_def="0:s:m:language:eng" # when subs=yes
 aopts_def="0:a:m:language:jpn"
 other_def="H.264"
 preset_def="slow"
+rsync_def="no"
 
 
 if [[ $1 = "default" ]]; then
@@ -20,6 +21,7 @@ if [[ $1 = "default" ]]; then
 	aopts=$aopts_def
 	other=$other_def
 	preset=$preset_def
+	rsync=$rsync_def
 elif [[ $1 == "read" ]]; then
     if [[ -f "./.encode_options" ]]; then
 	    cat .encode_options
@@ -83,6 +85,11 @@ else
     else
         preset=$preset_def
 	fi
+	echo "Use rsync? [no, PATH] (no)"
+	read rsync
+	if [[ $rsync = "" ]]; then
+		rsync=$rsync_def
+	fi
 fi
 
 cat > ./.encode_options<< EOF
@@ -94,6 +101,7 @@ $sopts
 $aopts
 $other
 $preset
+$rsync
 EOF
 
 echo "set!"
