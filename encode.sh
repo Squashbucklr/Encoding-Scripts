@@ -46,6 +46,8 @@ elif [[ $subs = "no" ]]; then
 	vpart=(-map 0:v)
 elif [[ $subs = "folder" ]]; then
     vpart=(-map 0:v:0 -vf "subtitles=subs/$2.mkv:si=${sopts}")
+elif [[ $subs = "file" ]]; then
+    vpart=(-map 0:v:0 -vf "subtitles=${sopts}")
 else # = si
 	vpart=(-map 0:v:0 -vf "subtitles=$inpv:si=${sopts}")
 fi
@@ -99,6 +101,7 @@ acom=("${apart[@]}" "${afilter[@]}" "${acodecs[@]}")
 t=()
 # comment this
 # t=(-ss 00:00:00 -to 00:01:31)
+# t=(-ss 00:03:00 -to 00:05:00)
 
 
 echo "Encoding video..."
@@ -116,7 +119,7 @@ if [[ $? -ne 0 ]]; then
 	exit 1
 fi
 
-rm $inpv
+# rm $inpv
 if [[ $rsync = "no" ]]; then
     echo skip > /dev/null
 else

@@ -57,7 +57,7 @@ else
 		if [[ $sopts = "" ]]; then
 			sopts=$sopts_yes_def
 		fi
-	elif [[ $subs = "si" ]] || [[ $subs = "folder" ]]; then
+	elif [[ $subs = "si" ]] || [[ $subs = "folder" ]] || [[ $subs = "file" ]]; then
 		echo "Set subtitle si options (0)"
 		read sopts
 		if [[ $sopts = "" ]]; then
