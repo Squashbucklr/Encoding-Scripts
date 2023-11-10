@@ -71,12 +71,12 @@ else
 	if [[ $aopts = "" ]]; then
 		aopts=$aopts_def
 	fi
-	echo "Set other options (video encoder) [H.264, VP9, 2pass-VP9] (H.264)"
+	echo "Set other options (video encoder) [H.264, nvenc, VP9, 2pass-VP9] (H.264)"
 	read other
 	if [[ $other = "" ]]; then
 		other=$other_def
 	fi
-	if [[ $other = "H.264" ]]; then
+	if [[ $other = "H.264" ]] || [[ $other = "nvenc" ]]; then
 		echo "Set H.264 profile (slow)"
 		read preset
 		if [[ $preset = "" ]]; then

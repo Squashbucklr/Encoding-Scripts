@@ -81,8 +81,13 @@ elif [[ $other = "2pass-VP9" ]]; then
     acodecs=(-c:a libopus -b:a 160k)
     output=".webm"
     twopass="true"
+elif [[ $other = "nvenc" ]]; then
+    vcodecs=(-c:v h264_nvenc -tune hq -pix_fmt yuv420p -cq `echo "$crf"` -preset $preset -maxrate 8M -bufsize 16M)
+    acodecs=(-c:a aac -b:a 160k)
+    output=".mp4"
+    twopass="false"
 else
-    vcodecs=(-c:v libx264 -preset $preset -tune animation -maxrate 8M -bufsize 16M)
+    vcodecs=(-c:v libx264 -tune animation -pix_fmt yuv420p -crf `echo "$crf"` -aq-mode 3 -vsync 2 -preset $preset -maxrate 8M -bufsize 16M)
     acodecs=(-c:a aac -b:a 160k)
     output=".mp4"
     twopass="false"
@@ -94,14 +99,14 @@ fi
 
 # MASTER ENCODING COMMAND
 fcom=(nice -n15 ffmpeg -n -v warning -stats -i "$inpv")
-vcom=("${vpart[@]}" "${vcodecs[@]}" -crf `echo "$crf"` -aq-mode 3 -vsync 2)
+vcom=("${vpart[@]}" "${vcodecs[@]}")
 acom=("${apart[@]}" "${afilter[@]}" "${acodecs[@]}")
 
 
 t=()
 # comment this
-# t=(-ss 00:00:00 -to 00:01:31)
-# t=(-ss 00:03:00 -to 00:05:00)
+# t=(-ss 00:00:00 -to 00:01:00)
+#t=(-ss 00:03:00 -to 00:05:00)
 
 
 echo "Encoding video..."
