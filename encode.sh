@@ -23,7 +23,7 @@ if [[ $rsync = "no" ]]; then
     outv="$2"
 else
     echo
-    rsync --progress "$1" "$rsync/sym-$2.mkv"
+    rsync -L --progress "$1" "$rsync/sym-$2.mkv"
     inpv="$rsync/sym-$2.mkv"
     outv="$rsync/$2"
 fi
@@ -105,8 +105,8 @@ acom=("${apart[@]}" "${afilter[@]}" "${acodecs[@]}")
 
 t=()
 # comment this
-# t=(-ss 00:00:00 -to 00:01:00)
-#t=(-ss 00:03:00 -to 00:05:00)
+# t=(-ss 00:30:00 -to 00:30:00)
+# t=(-ss 00:30:00)
 
 
 echo "Encoding video..."
@@ -124,7 +124,7 @@ if [[ $? -ne 0 ]]; then
 	exit 1
 fi
 
-# rm $inpv
+rm $inpv
 if [[ $rsync = "no" ]]; then
     echo skip > /dev/null
 else
